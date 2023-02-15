@@ -1,0 +1,16 @@
+Модельки:
+	https://assetstore.unity.com/packages/3d/vehicles/air/awesome-cartoon-planes-style-3-60894#content
+	https://assetstore.unity.com/packages/templates/systems/racing-starter-kit-169750
+	https://assetstore.unity.com/packages/3d/vehicles/land/stylized-customizable-cars-post-apo-v1-130909#content
+	https://assetstore.unity.com/packages/3d/vehicles/land/low-poly-vehicle1-free-208280#content
+	https://assetstore.unity.com/packages/3d/vehicles/land/simple-cars-pack-97669
+	
+Ландшафт:
+	https://assetstore.unity.com/packages/3d/characters/easyroads3d-free-v3-987
+	https://assetstore.unity.com/packages/3d/props/props-for-track-environment-lowpoly-free-211494
+	https://assetstore.unity.com/packages/3d/environments/roadways/cartoon-race-track-oval-175061
+
+Музыка:
+	https://assetstore.unity.com/packages/audio/music/8bit-music-album-051321-196147
+	https://assetstore.unity.com/packages/audio/music/free-music-and-sfx-collection-4369#description
+	https://assetstore.unity.com/packages/audio/music/take-a-ride-lounge-music-77066
