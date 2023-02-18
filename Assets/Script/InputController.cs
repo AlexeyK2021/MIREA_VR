@@ -13,10 +13,15 @@ namespace Script
         private float horizontalSpeed;
         private Rigidbody _rigidbody;
 
+        private Vector3 _direction;
+        private Vector3 _eurlerAngles;
+
         // Start is called before the first frame update
         void Start()
         {
             _rigidbody = gameObject.GetComponent<Rigidbody>();
+            _direction = new Vector3(0, 0, 1);
+            _eurlerAngles = new Vector3(0, 10, 0);
         }
 
         // Update is called once per frame
@@ -33,21 +38,36 @@ namespace Script
             }
             else
             {
+                /*
                 forwardSpeed -= Math.Sign(forwardSpeed) * acceleration*Time.deltaTime;
                 if (forwardSpeed < 0.01f) forwardSpeed = 0;
+                */
+                if (forwardSpeed < 0.1f)
+                {
+                    forwardSpeed = 0.0f;
+                }
+                else
+                {
+                    forwardSpeed /= 1.1f;
+                }
             }
 
-            if (Input.GetAxis("Horizontal") > 0.0 && forwardSpeed > 0)
+            //
+            if (Input.GetAxis("Horizontal") > 0.0 && _rigidbody.velocity.sqrMagnitude > 0)
             {
-                horizontalSpeed += horAcceleration;
+                Quaternion deltaRotation = Quaternion.Euler(_eurlerAngles * Time.fixedDeltaTime);
+                _rigidbody.MoveRotation(_rigidbody.rotation * deltaRotation);
+                _direction = deltaRotation * _direction;
             }
-            else if (Input.GetAxis("Horizontal") < 0.0 && forwardSpeed > 0)
+            else if (Input.GetAxis("Horizontal") < 0.0 && _rigidbody.velocity.sqrMagnitude > 0)
             {
-                horizontalSpeed -= horAcceleration;
+                Quaternion deltaRotation = Quaternion.Euler(-_eurlerAngles * Time.fixedDeltaTime);
+                _rigidbody.MoveRotation(_rigidbody.rotation * deltaRotation);
+                _direction = deltaRotation * _direction;
             }
 
-            Debug.Log(forwardSpeed);
-            _rigidbody.AddForce(new Vector3(horizontalSpeed, 0, forwardSpeed), ForceMode.Force);
+            Debug.Log("Power: " + forwardSpeed + "; velocity: " + _rigidbody.velocity);
+            _rigidbody.AddForce(forwardSpeed * _direction, ForceMode.Force);
         }
     }
 }
