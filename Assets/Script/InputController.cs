@@ -5,69 +5,86 @@ namespace Script
 {
     public class InputController : MonoBehaviour
     {
-        [SerializeField] private float acceleration;
-        [SerializeField] private float horAcceleration;
-        [SerializeField] private float autoBrake;
+        private Vector3 tractionForce;                        // F(traction) = engineForce * dir
+        private const float ENGINE_FORCE = 40000;
+        private float engineForce;
+        private Vector3 airResistForce;                       // F(drag) = -const * velocity * |velocity| 
+        private const float AIR_RESIST = 0.2257f;      
+        private Vector3 frictionForce;                        // F(rr) = -const * velocity
+        private const float FRICTION = AIR_RESIST * 30;
+        private Vector3 F;                                    // F(long) = F(traction) + F(drag) * F(rr)
+        private Vector3 breakingForce;                        // F(br) = -breakingForce * dir
+        private const float BREAKING = 10000;
+        private const float TURNING_ANGLE = 30;
+        //private float Wf;                                     // weight on the front axle
+        //private float Wr;                                     // weight on the back axle
+        //private const float G = 9.8f;
+        //private Vector3 acceleration = Vector3.zero;
+        //private Vector3 lastVelocity = Vector3.zero;
 
-        private float forwardSpeed;
-        private float horizontalSpeed;
         private Rigidbody _rigidbody;
 
-        private Vector3 _direction;
         private Vector3 _eurlerAngles;
 
         // Start is called before the first frame update
         void Start()
         {
             _rigidbody = gameObject.GetComponent<Rigidbody>();
-            _direction = new Vector3(0, 0, 1);
             _eurlerAngles = new Vector3(0, 10, 0);
         }
 
         // Update is called once per frame
         void Update()
         {
-            Vector3 move = new Vector3();
-            if (Input.GetAxis("Forward") > 0)
+            /* For the future
+            acceleration = (_rigidbody.velocity - lastVelocity) / Time.deltaTime;
+            Wf = 0.5f * _rigidbody.mass * G - (0.2f / 2.72f) * _rigidbody.mass * acceleration.sqrMagnitude;
+            Wr = 0.5f * _rigidbody.mass * G + (0.2f / 2.72f) * _rigidbody.mass * acceleration.sqrMagnitude;
+            */
+
+            tractionForce = ENGINE_FORCE * _rigidbody.transform.forward;
+            airResistForce = -AIR_RESIST * _rigidbody.velocity * _rigidbody.velocity.sqrMagnitude;
+            frictionForce = -FRICTION * _rigidbody.velocity;
+            breakingForce = -BREAKING * _rigidbody.velocity.normalized;
+
+            if (Input.GetAxis("Forward") > 0) // Move forward
             {
-                forwardSpeed += acceleration;
+                F = tractionForce + airResistForce + frictionForce;
             }
-            else if (Input.GetAxis("Forward") < 0)
+            else if (Input.GetAxis("Forward") < 0) // Move back
             {
-                forwardSpeed -= acceleration;
+                F = -(tractionForce / 1.25f) + airResistForce + frictionForce;
             }
-            else
+            else // do nothing
             {
-                /*
-                forwardSpeed -= Math.Sign(forwardSpeed) * acceleration*Time.deltaTime;
-                if (forwardSpeed < 0.01f) forwardSpeed = 0;
-                */
-                if (forwardSpeed < 0.1f)
-                {
-                    forwardSpeed = 0.0f;
-                }
-                else
-                {
-                    forwardSpeed /= 1.1f;
-                }
+                F = airResistForce + frictionForce;
             }
 
-            //
+            if (Input.GetAxis("Jump") > 0.0f && _rigidbody.velocity.sqrMagnitude > 0.5) // Breaking
+            {
+                F = breakingForce + airResistForce + frictionForce;
+            }
+
+
+            Debug.Log("TractionForce: " + tractionForce +
+                "\nAirResistForce: " + airResistForce +
+                "\nFrictionForce: " + frictionForce +
+                "\nF: " + F +
+                "\nVelocity: " + _rigidbody.velocity);
+            _rigidbody.AddForce(F, ForceMode.Force);
+            //_rigidbody.AddForceAtPosition(F, transform.TransformPoint(new Vector3(0, 0, -1)), ForceMode.Force);
+
+            // Rotation
             if (Input.GetAxis("Horizontal") > 0.0 && _rigidbody.velocity.sqrMagnitude > 0)
             {
-                Quaternion deltaRotation = Quaternion.Euler(_eurlerAngles * Time.fixedDeltaTime);
-                _rigidbody.MoveRotation(_rigidbody.rotation * deltaRotation);
-                _direction = deltaRotation * _direction;
+                //Quaternion deltaRotation = Quaternion.Euler(_eurlerAngles * Time.fixedDeltaTime);
+                //_rigidbody.MoveRotation(_rigidbody.rotation * deltaRotation);
             }
             else if (Input.GetAxis("Horizontal") < 0.0 && _rigidbody.velocity.sqrMagnitude > 0)
             {
-                Quaternion deltaRotation = Quaternion.Euler(-_eurlerAngles * Time.fixedDeltaTime);
-                _rigidbody.MoveRotation(_rigidbody.rotation * deltaRotation);
-                _direction = deltaRotation * _direction;
+                //Quaternion deltaRotation = Quaternion.Euler(-_eurlerAngles * Time.fixedDeltaTime);
+                //_rigidbody.MoveRotation(_rigidbody.rotation * deltaRotation);
             }
-
-            Debug.Log("Power: " + forwardSpeed + "; velocity: " + _rigidbody.velocity);
-            _rigidbody.AddForce(forwardSpeed * _direction, ForceMode.Force);
         }
     }
 }
