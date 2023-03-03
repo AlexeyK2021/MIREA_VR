@@ -15,7 +15,9 @@ namespace Script
         private Vector3 F;                                    // F(long) = F(traction) + F(drag) * F(rr)
         private Vector3 breakingForce;                        // F(br) = -breakingForce * dir
         private const float BREAKING = 10000;
-        private const float TURNING_ANGLE = 30;
+        [SerializeField] private float TURNING_ANGLE = 5;
+        [SerializeField] private float VEHICLE_LENGHT = 3;
+        private float R;
         //private float Wf;                                     // weight on the front axle
         //private float Wr;                                     // weight on the back axle
         //private const float G = 9.8f;
@@ -31,6 +33,7 @@ namespace Script
         {
             _rigidbody = gameObject.GetComponent<Rigidbody>();
             _eurlerAngles = new Vector3(0, 10, 0);
+            R = VEHICLE_LENGHT / (float)Math.Sin(TURNING_ANGLE) * 100;
         }
 
         // Update is called once per frame
@@ -66,11 +69,14 @@ namespace Script
             }
 
 
+            /*
             Debug.Log("TractionForce: " + tractionForce +
                 "\nAirResistForce: " + airResistForce +
                 "\nFrictionForce: " + frictionForce +
                 "\nF: " + F +
                 "\nVelocity: " + _rigidbody.velocity);
+            */
+            Debug.Log("AngVel: " + _rigidbody.angularVelocity + "\nVel: " + _rigidbody.velocity);
             _rigidbody.AddForce(F, ForceMode.Force);
             //_rigidbody.AddForceAtPosition(F, transform.TransformPoint(new Vector3(0, 0, -1)), ForceMode.Force);
 
@@ -79,11 +85,13 @@ namespace Script
             {
                 //Quaternion deltaRotation = Quaternion.Euler(_eurlerAngles * Time.fixedDeltaTime);
                 //_rigidbody.MoveRotation(_rigidbody.rotation * deltaRotation);
+                _rigidbody.angularVelocity = new Vector3(0.0f, -_rigidbody.velocity.sqrMagnitude / R, 0.0f); 
             }
             else if (Input.GetAxis("Horizontal") < 0.0 && _rigidbody.velocity.sqrMagnitude > 0)
             {
                 //Quaternion deltaRotation = Quaternion.Euler(-_eurlerAngles * Time.fixedDeltaTime);
                 //_rigidbody.MoveRotation(_rigidbody.rotation * deltaRotation);
+                _rigidbody.angularVelocity = new Vector3(0.0f, _rigidbody.velocity.sqrMagnitude / R, 0.0f); 
             }
         }
     }
